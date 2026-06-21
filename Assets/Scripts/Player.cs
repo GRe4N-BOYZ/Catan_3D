@@ -1,12 +1,11 @@
-using UnityEngine;
-
 public class Player
 {
     public string name;
     public PlayerColor color;
-/*将来用
+    public int settlementCount;
     public int wood;
     public int brick;
-    */
-
+    public int wheat;
+    public int sheep;
+    public int ore;
 }

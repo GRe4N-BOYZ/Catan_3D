@@ -258,6 +258,9 @@ public class HexBoard : MonoBehaviour
 
         edgeScript.vertexA = a;
         edgeScript.vertexB = b;
+
+        a.connectedEdges.Add(edgeScript);
+        b.connectedEdges.Add(edgeScript);
     }
 
     // Update is called once per frame

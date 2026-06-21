@@ -7,8 +7,10 @@ public class PlayerManager : MonoBehaviour
 
     public List<Player> players = new List<Player>();
     public int currentIndex = 0;
-
+    public bool setupPhase = true;
     public Player currentPlayer => players[currentIndex];
+     public int initialPlacementCount = 0;
+     public bool reverseOrder = false;
 
     public static PlayerManager EnsureInstance()
     {
@@ -56,6 +58,22 @@ public class PlayerManager : MonoBehaviour
         players.Add(new Player { name = "Yellow", color = PlayerColor.White });
     }
 
+    /*public void NextPlayer()
+        {
+            if(setupPhase && reverseOrder)
+            {
+                currentIndex--;
+                if(currentIndex < 0)
+                {
+                    currentIndex = players.Count - 1;
+                }
+            }
+            else
+            {
+                currentIndex = (currentIndex + 1) % players.Count;
+            }
+            Debug.Log(currentPlayer.name);
+        }*/
     public void NextPlayer()
     {
         currentIndex = (currentIndex + 1) % players.Count;

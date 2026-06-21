@@ -9,14 +9,20 @@ public class InputManager : MonoBehaviour
     public GameObject roadPrefab;
 
     [FormerlySerializedAs("vertexLayer")]
-    public LayerMask BuildLayer;
+    private LayerMask BuildMask;
+    private LayerMask currentMask;
+    private LayerMask settlementMask;
+    private LayerMask roadMask;
 
     void Start()
     {
         mainCamera = Camera.main;
         PlayerManager.EnsureInstance();
-        EnsureBuildLayerIncludesBuildObjects();
-        Debug.Log("BuildLayer value: " + BuildLayer.value);
+        
+        settlementMask = LayerMask.GetMask("Vertex");
+        roadMask = LayerMask.GetMask("Edge");
+
+        currentMask = settlementMask;
     }
 
     void Update()
@@ -30,6 +36,15 @@ public class InputManager : MonoBehaviour
         if(Mouse.current == null) return;
         if(mainCamera == null) return;
 
+        if(GameManager.Instance.currentState == GameManager.GameState.InitialSettlement)
+        {
+            currentMask = settlementMask;
+        }
+        else if(GameManager.Instance.currentState == GameManager.GameState.InitialRoad)
+        {
+            currentMask = roadMask;
+        }
+
         if(Mouse.current.leftButton.wasPressedThisFrame)
         {
             Ray ray =
@@ -40,7 +55,7 @@ public class InputManager : MonoBehaviour
 
             Debug.DrawRay(ray.origin, ray.direction * 100f, Color.red);
 
-            if(Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, BuildLayer))
+            if(Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, currentMask))
             {
                 Debug.Log("Hit: " + hit.collider.name);
 
@@ -49,7 +64,13 @@ public class InputManager : MonoBehaviour
 
                 if(vertex != null)
                 {
-                    bool success = vertex.BuildSettlement
+                    Debug.Log
+                    (
+                        "connectedEdges = " +
+                        vertex.connectedEdges.Count
+                    );
+
+                    /*bool success = vertex.BuildSettlement
                     (
                         settlementPrefab,
                         PlayerManager.Instance.currentPlayer
@@ -58,20 +79,23 @@ public class InputManager : MonoBehaviour
                     if(success)
                     {
                         PlayerManager.Instance.NextPlayer();
-                    }
+                    }*/
+                    if(vertex != null)
+                        {
+                            vertex.BuildSettlement
+                            (
+                                settlementPrefab,
+                                PlayerManager.Instance.currentPlayer
+                            );
+                        }
                 }
                 else if(edge != null)
                 {
-                    bool success = edge.BuildRoad
+                    edge.BuildRoad
                     (
                         roadPrefab,
                         PlayerManager.Instance.currentPlayer
                     );
-
-                    if(success)
-                    {
-                        PlayerManager.Instance.NextPlayer();
-                    }
                 }
                 else
                 {
@@ -90,6 +114,6 @@ public class InputManager : MonoBehaviour
         int buildObjectLayers =
             LayerMask.GetMask("Vertex", "Edge");
 
-        BuildLayer |= buildObjectLayers;
+        BuildMask |= buildObjectLayers;
     }
 }

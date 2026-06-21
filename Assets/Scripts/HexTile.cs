@@ -5,6 +5,7 @@ public class HexTile : MonoBehaviour
 {
     public ResourceType resourceType;
     public int numberToken;
+    public int diceNumber;
     public bool hasRobber;
     public List<Vertex> adjacentVertices = new List<Vertex>();
 
