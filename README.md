@@ -208,4 +208,4 @@ Individual Project
 - 3D Modeling
 - Game Design
 
-Developed by UGARUN
+Developed by Ugallun
