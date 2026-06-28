@@ -9,8 +9,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2047983575041321842}
-  - component: {fileID: -241928487655712808}
   - component: {fileID: -7070574862253943737}
+  - component: {fileID: -7133988901932899496}
   m_Layer: 7
   m_Name: Edge
   m_TagString: Untagged
@@ -34,21 +34,6 @@ Transform:
   - {fileID: 5105849318609749304}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &-241928487655712808
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5163430985075033808}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a052fd2ca352d0e43b63e21c32f46833, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Road
-  vertexA: {fileID: 0}
-  vertexB: {fileID: 0}
-  road: {fileID: 0}
 --- !u!65 &-7070574862253943737
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -70,6 +55,21 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 0.1, z: 0.15}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &-7133988901932899496
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5163430985075033808}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e35e97ceec51b674291e8a9e8cecdcba, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Edge
+  vertexA: {fileID: 0}
+  vertexB: {fileID: 0}
+  road: {fileID: 0}
 --- !u!1001 &4706586629011858131
 PrefabInstance:
   m_ObjectHideFlags: 0
