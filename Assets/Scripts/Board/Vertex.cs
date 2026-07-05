@@ -1,4 +1,6 @@
 using System.Collections.Generic;
+using NUnit.Framework;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class Vertex : MonoBehaviour
@@ -6,59 +8,59 @@ public class Vertex : MonoBehaviour
     public List<HexTile> adjacentTiles = new List<HexTile>();
     public List<Edge> connectedEdges = new List<Edge>();
 
-    public Settlement settlement;
-    public bool hasSettlement()
+    public Building building;
+    public bool HasBuilding()
     {
-        return settlement != null;
+        return building != null;
     }
 
     public bool BuildSettlement(GameObject settlementPrefab, Player player)
     {
-        if(GameManager.Instance.currentState
-            != GameManager.GameState.InitialSettlement)
+        if(GameManager.Instance.currentState != GameManager.GameState.InitialSettlement)
         {
             return false;
         }
-
-        if(settlement != null)
+        if(PlayerManager.Instance.setupPhase)
         {
-            return false;
-        }
-
-        if (HasAdjacentSettlement())
+            if(!CanBuildInitialSettlement())
             {
-                Debug.Log("隣に開拓地があります");
+                Debug.Log("ここには建設できません");
                 return false;
             }
-        
-        if(!PlayerManager.Instance.setupPhase && !CanBuildSettlement(player))
+        } else
         {
-            Debug.Log("自分の街道と接続していません");
-            return false;
+            if(!CanBuildSettlement(player))
+            {
+                Debug.Log("自分の街道と接続していません");
+                return false;
+            }
+            
+            if(!player.CanAffordSettlement())
+            {
+                Debug.Log("資源が足りません");
+                return false;
+            }
         }
 
-        GameObject obj =
-            Instantiate
-            (
-                settlementPrefab,
-                transform.position,
-                Quaternion.identity
-            );
-        settlement = obj.GetComponent<Settlement>();
+        building = CreateSettlement(settlementPrefab, player);
 
-        settlement.owner = player;
         GameManager.Instance.lastPlacedSettlement = this;
-        GameManager.Instance.ChangeState(GameManager.GameState.InitialRoad);
-        Renderer renderer = obj.GetComponentInChildren<Renderer>();
-
-        if(renderer != null)
+        
+        if(!PlayerManager.Instance.setupPhase)
         {
-            renderer.material.color = PlayerColorUtil.ToUnityColor(player.color);
+            player.SpendSettlementCost();
+            UIManager.Instance.UpdateAll();
         }
+        
+        GameManager.Instance.ChangeState
+        (
+            GameManager.GameState.InitialRoad
+        );
+        
         return true;
     }
 
-    public bool HasAdjacentSettlement()
+    public bool HasAdjacentBuilding()
     {
         foreach(Edge edge in connectedEdges)
         {
@@ -67,31 +69,69 @@ public class Vertex : MonoBehaviour
                 ? edge.vertexB
                 : edge.vertexA;
             
-            if(other != null && other.hasSettlement())
+            if(other != null && other.HasBuilding())
             {
                 return true;
             }
         }
         return false;
     }
-
+ 
     public bool CanBuildSettlement(Player player)
+    {
+        if(building != null) return false;
+        if(HasAdjacentBuilding()) return false;
+
+        if (connectedEdges == null) return false;
+
+        foreach (Edge edge in connectedEdges)
+            {
+                if (edge.road != null && edge.road.owner == player)
+                    {
+                        return true;
+                    }
+            }
+        return false;
+    }
+    
+    public bool CanBuildInitialSettlement()
+    {
+        if(building != null) return false;
+
+        if(HasAdjacentBuilding()) return false;
+        
+        return true;
+    }
+
+    public bool CanUpgradeToCity(Player player)
+    {
+        if(building == null) return false;
+        Settlement settlement = building as Settlement;
+        if(settlement == null) return false;
+        if(settlement.owner != player) return false;
+
+        return true;
+    }
+
+    private Settlement CreateSettlement(GameObject prefab, Player player)
+    {
+        GameObject obj = Instantiate
+        (
+            prefab,
+            transform.position,
+            Quaternion.identity
+        );
+
+        Settlement settlement = obj.GetComponent<Settlement>();
+
+        settlement.owner = player;
+
+        Renderer renderer = obj.GetComponentInChildren<Renderer>();
+
+        if(renderer != null)
         {
-            // 繋がっている道路のリストが空っぽなら、当然建てられない
-            if (connectedEdges == null) return false;
-
-            // 繋がっている道路（Edge）を1本ずつ順番にチェックしていく
-            foreach (Edge edge in connectedEdges)
-                {
-                    // その道路に「道路がすでに建っていて」、かつ「持ち主が自分」ならOK！
-                    if (edge.road != null && edge.road.owner == player)
-                        {
-                            return true; // 1本でも見つかれば、その時点で建築可能（即終了）
-                        }
-                }
-
-            // 全部調べても自分の道路が1本もなかったらダメ
-            return false;
+            renderer.material.color = PlayerColorUtil.ToUnityColor(player.color);
         }
-
+        return settlement;
+    }
 }

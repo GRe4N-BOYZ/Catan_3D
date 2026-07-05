@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class Settlement : MonoBehaviour
+public class Settlement : Building
 {
-    public Player owner;
+    
 }

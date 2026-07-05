@@ -44,13 +44,13 @@ public class ResourceManager : MonoBehaviour
                 continue;
             }
 
-            if (vertex.settlement == null)
+            if (vertex.building == null)
             {
                 continue;
             }
 
             Player owner =
-                vertex.settlement.owner;
+                vertex.building.owner;
 
             GiveResource
             (

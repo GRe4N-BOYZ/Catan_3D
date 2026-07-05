@@ -8,34 +8,33 @@ public class Edge : MonoBehaviour
     public Road road;
 
     public bool BuildRoad(GameObject roadPrefab, Player player)
+    {
+        if (GameManager.Instance.currentState != GameManager.GameState.InitialRoad)
         {
-            if(road != null)
-            {
-                Debug.Log("すでに街道が存在します");
-                return false;
-            }
-            if(!PlayerManager.Instance.setupPhase && !CanBuildRoad(player))
-            {
-                Debug.Log("自分の村と接続していません");
-                return false;
-            }
-            if(GameManager.Instance.currentState
-            != GameManager.GameState.InitialRoad)
-                {
-                    return false;
-                }
+            return false;
+        }
 
-            if(PlayerManager.Instance.setupPhase)
-                {
-                    Vertex last =
-                    GameManager.Instance.lastPlacedSettlement;
-                    
-                    if(vertexA != last && vertexB != last)
-                    {
-                        Debug.Log("直前の開拓地に接続してください");
-                        return false;
-                    }
-                }
+        if (PlayerManager.Instance.setupPhase)
+        {
+            if (!CanBuildInitialRoad())
+            {
+                Debug.Log("直前の開拓地に接続してください");
+                return false;
+            }
+        } else
+        {
+            if (!CanBuildRoad(player))
+            {
+                Debug.Log("ここには道路を建てられません");
+                return false;
+            }
+                
+            if (!player.CanAffordRoad())
+            {
+                Debug.Log("資源が足りません");
+                return false;
+            }
+        }
             
 
             GameObject obj =
@@ -57,32 +56,43 @@ public class Edge : MonoBehaviour
                 renderer.material.color = PlayerColorUtil.ToUnityColor(player.color);
             }
             
-            PlayerManager.Instance.FinishInitialRoad();
+            if (PlayerManager.Instance.setupPhase)
+            {
+                PlayerManager.Instance.FinishInitialRoad();
+            } else
+            {
+                player.SpendRoadCost();
+                UIManager.Instance.UpdateAll();
+            }
 
             return true;
         }
+
     public bool CanBuildRoad(Player player)
     {
+        //街道あるか
+        if(road != null) return false;
+        
+        //村から接続
+        if(vertexA.building != null &&
+        vertexA.building.owner == player) return true;
+    
         if
-        (vertexA.settlement != null &&
-        vertexA.settlement.owner == player)
-        {
-            return true;
-        }else if
-        (vertexB.settlement != null &&
-        vertexB.settlement.owner == player)
-        {
-            return true;
-        }else
-        {
-            return false;
-        }
+        (vertexB.building != null &&
+        vertexB.building.owner == player) return true;
+
+        // 道路から接続
+        if (IsRoadConnectedAtVertex(vertexA, player)) return true;
+
+        if (IsRoadConnectedAtVertex(vertexB, player)) return true;
+        
+        return false;
     }
 
     private bool IsRoadConnectedAtVertex(Vertex vertex, Player player)
     {
         // 【分断ルール】もしその交差点に「自分以外の開拓地（敵の村）」があったら、道路は分断されて伸ばせない！
-        if (vertex.settlement != null && vertex.settlement.owner != player)
+        if (vertex.building != null && vertex.building.owner != player)
         {
             return false; 
         }
@@ -104,5 +114,13 @@ public class Edge : MonoBehaviour
         }
 
         return false;
+    }
+
+    public bool CanBuildInitialRoad()
+    {
+        Vertex last = GameManager.Instance.lastPlacedSettlement;
+
+        return vertexA == last ||
+               vertexB == last;
     }
 }
