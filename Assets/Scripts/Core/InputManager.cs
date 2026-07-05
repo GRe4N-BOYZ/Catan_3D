@@ -7,6 +7,7 @@ public class InputManager : MonoBehaviour
     Camera mainCamera;
     public GameObject settlementPrefab;
     public GameObject roadPrefab;
+    public GameObject cityPrefab;
 
     [FormerlySerializedAs("vertexLayer")]
     private LayerMask BuildMask;
@@ -14,7 +15,7 @@ public class InputManager : MonoBehaviour
     private LayerMask settlementMask;
     private LayerMask roadMask;
 
-    void Start()
+    public void Start()
     {
         mainCamera = Camera.main;
         PlayerManager.EnsureInstance();
@@ -25,7 +26,7 @@ public class InputManager : MonoBehaviour
         currentMask = settlementMask;
     }
 
-    void Update()
+    public void Update()
     {
         if(PlayerManager.Instance == null)
         {
@@ -86,28 +87,45 @@ public class InputManager : MonoBehaviour
 
                 if(vertex != null)
                 {
-                    switch(GameManager.Instance.currentBuildMode)
+                    if(PlayerManager.Instance.setupPhase)
                     {
-                        case BuildMode.Settlement:
-                            vertex.BuildSettlement
-                            (
-                                settlementPrefab,
-                                PlayerManager.Instance.currentPlayer
-                            );
-                            break;
-                        
-                        /*case BuildMode.City:
-                            vertex.BuildCity
-                            (
-                                PlayerManager.Instance.currentPlayer
-                            );
-                            break;*/
+                        vertex.BuildSettlement
+                        (
+                            settlementPrefab,
+                            PlayerManager.Instance.currentPlayer
+                        );
+                    } else
+                    {
+                        switch(GameManager.Instance.currentBuildMode)
+                        {
+                            case BuildMode.Settlement:
+                                vertex.BuildSettlement
+                                (
+                                    settlementPrefab,
+                                    PlayerManager.Instance.currentPlayer
+                                );
+                                break;
+                            
+                            case BuildMode.City:
+                                vertex.UpgradeToCity
+                                (
+                                    cityPrefab,
+                                    PlayerManager.Instance.currentPlayer
+                                );
+                                break;
+                        }
                     }
                 }
                 else if(edge != null)
                 {
-                    if(GameManager.Instance.currentBuildMode
-                        == BuildMode.Road)
+                    if(PlayerManager.Instance.setupPhase)
+                    {
+                        edge.BuildRoad
+                        (
+                            roadPrefab,
+                            PlayerManager.Instance.currentPlayer
+                        );
+                    } else if(GameManager.Instance.currentBuildMode == BuildMode.Road)
                     {
                         edge.BuildRoad
                         (
@@ -128,7 +146,7 @@ public class InputManager : MonoBehaviour
         }
     }
 
-    void EnsureBuildLayerIncludesBuildObjects()
+    public void EnsureBuildLayerIncludesBuildObjects()
     {
         int buildObjectLayers =
             LayerMask.GetMask("Vertex", "Edge");

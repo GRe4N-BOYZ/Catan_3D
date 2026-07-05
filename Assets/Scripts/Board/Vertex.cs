@@ -60,6 +60,25 @@ public class Vertex : MonoBehaviour
         return true;
     }
 
+    public bool UpgradeToCity(GameObject cityPrefab, Player player)
+    {
+        if(!CanUpgradeToCity(player))
+        {
+            Debug.Log("都市化できません");
+            return false;
+        }
+        if(player.CanAffordCity())
+        {
+            Debug.Log("資源が足りません");
+            return false;
+        }
+        CreateCity(cityPrefab, player);
+        player.SpendCityCost();
+        UIManager.Instance.UpdateAll();
+        
+        return true;
+    }
+
     public bool HasAdjacentBuilding()
     {
         foreach(Edge edge in connectedEdges)
@@ -106,9 +125,11 @@ public class Vertex : MonoBehaviour
     public bool CanUpgradeToCity(Player player)
     {
         if(building == null) return false;
+        if(building is City) return false;
         Settlement settlement = building as Settlement;
         if(settlement == null) return false;
         if(settlement.owner != player) return false;
+        
 
         return true;
     }
@@ -133,5 +154,26 @@ public class Vertex : MonoBehaviour
             renderer.material.color = PlayerColorUtil.ToUnityColor(player.color);
         }
         return settlement;
+    }
+
+    private City CreateCity(GameObject prefab, Player player)
+    {
+        Destroy(building.gameObject);
+        GameObject obj = Instantiate
+        (
+            prefab,
+            transform.position,
+            Quaternion.identity
+        );
+        City city = obj.GetComponent<City>();
+        city.owner = player;
+        Renderer renderer = obj.GetComponentInChildren<Renderer>();
+
+        if(renderer != null)
+        {
+            renderer.material.color = PlayerColorUtil.ToUnityColor(player.color);
+        }
+        building = city;
+        return city;
     }
 }
