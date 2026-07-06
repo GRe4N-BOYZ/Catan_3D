@@ -98,9 +98,9 @@ HexBoard
 
 保持情報
 
-- ResourceType
-- DiceNumber
-- AdjacentVertices
+- resourceType
+- numberToken
+- adjacentVertices
 
 ---
 
