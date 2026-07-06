@@ -54,8 +54,8 @@ public class PlayerManager : MonoBehaviour
 
         players.Add(new Player { name = "Red", color = PlayerColor.Red });
         players.Add(new Player { name = "Blue", color = PlayerColor.Blue });
-        players.Add(new Player { name = "Green", color = PlayerColor.Orange });
-        players.Add(new Player { name = "Yellow", color = PlayerColor.White });
+        players.Add(new Player { name = "Orange", color = PlayerColor.Orange });
+        players.Add(new Player { name = "White", color = PlayerColor.White });
     }
 
     public void NextPlayer()

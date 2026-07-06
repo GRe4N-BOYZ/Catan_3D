@@ -20,8 +20,7 @@ public class DiceManager : MonoBehaviour
 
         UIManager.Instance.UpdateDiceUI();
         UIManager.Instance.UpdateResourceUI();
-        UIManager.Instance.UpdatePhaseUI();
-        
+
         GameManager.Instance.ChangeState
         (
             GameManager.GameState.PlayerAction

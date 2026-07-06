@@ -9,16 +9,15 @@ public class Edge : MonoBehaviour
 
     public bool BuildRoad(GameObject roadPrefab, Player player)
     {
-        if (GameManager.Instance.currentState != GameManager.GameState.InitialRoad)
-        {
-            return false;
-        }
-
         if (PlayerManager.Instance.setupPhase)
         {
             if (!CanBuildInitialRoad())
             {
                 Debug.Log("直前の開拓地に接続してください");
+                return false;
+            }
+            if (GameManager.Instance.currentState != GameManager.GameState.InitialRoad)
+            {
                 return false;
             }
         } else
@@ -34,39 +33,44 @@ public class Edge : MonoBehaviour
                 Debug.Log("資源が足りません");
                 return false;
             }
+            if (GameManager.Instance.currentState != GameManager.GameState.PlayerAction)
+            {
+                return false;
+            }
         }
             
 
-            GameObject obj =
-                Instantiate
-                (
-                    roadPrefab,
-                    transform.position,
-                    transform.rotation
-                );
+        GameObject obj =
+            Instantiate
+            (
+                roadPrefab,
+                transform.position,
+                transform.rotation
+            );
 
-            road = obj.GetComponent<Road>();
-            road.owner = player;
+        road = obj.GetComponent<Road>();
+        road.owner = player;
 
-            Renderer renderer =
-                obj.GetComponentInChildren<Renderer>();
+        Renderer renderer =
+            obj.GetComponentInChildren<Renderer>();
 
-            if(renderer != null)
-            {
-                renderer.material.color = PlayerColorUtil.ToUnityColor(player.color);
-            }
-            
-            if (PlayerManager.Instance.setupPhase)
-            {
-                PlayerManager.Instance.FinishInitialRoad();
-            } else
-            {
-                player.SpendRoadCost();
-                UIManager.Instance.UpdateAll();
-            }
-
-            return true;
+        if(renderer != null)
+        {
+            renderer.material.color = PlayerColorUtil.ToUnityColor(player.color);
         }
+            
+        if (PlayerManager.Instance.setupPhase)
+        {
+            PlayerManager.Instance.FinishInitialRoad();
+        } else
+        {
+            player.SpendRoadCost();
+            UIManager.Instance.UpdateAll();
+            GameManager.Instance.ChangeBuildMode(BuildMode.None);
+        }
+
+        return true;
+    }
 
     public bool CanBuildRoad(Player player)
     {

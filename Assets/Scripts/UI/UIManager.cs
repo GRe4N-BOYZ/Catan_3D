@@ -80,6 +80,8 @@ public class UIManager : MonoBehaviour
 
     public void SetSettlementMode()
     {
+        if(GameManager.Instance.currentState
+            != GameManager.GameState.PlayerAction) return;
         GameManager.Instance.ChangeBuildMode
         (
             BuildMode.Settlement
@@ -88,6 +90,8 @@ public class UIManager : MonoBehaviour
 
     public void SetRoadMode()
     {
+        if(GameManager.Instance.currentState
+            != GameManager.GameState.PlayerAction) return;
         GameManager.Instance.ChangeBuildMode
         (
             BuildMode.Road
@@ -96,6 +100,8 @@ public class UIManager : MonoBehaviour
 
     public void SetCityMode()
     {
+        if(GameManager.Instance.currentState
+            != GameManager.GameState.PlayerAction) return;
         GameManager.Instance.ChangeBuildMode
         (
             BuildMode.City

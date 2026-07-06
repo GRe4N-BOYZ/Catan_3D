@@ -16,12 +16,13 @@ public class Vertex : MonoBehaviour
 
     public bool BuildSettlement(GameObject settlementPrefab, Player player)
     {
-        if(GameManager.Instance.currentState != GameManager.GameState.InitialSettlement)
-        {
-            return false;
-        }
         if(PlayerManager.Instance.setupPhase)
         {
+            if(GameManager.Instance.currentState
+                != GameManager.GameState.InitialSettlement)
+            {
+                return false;
+            }
             if(!CanBuildInitialSettlement())
             {
                 Debug.Log("ここには建設できません");
@@ -40,6 +41,11 @@ public class Vertex : MonoBehaviour
                 Debug.Log("資源が足りません");
                 return false;
             }
+            if(GameManager.Instance.currentState
+                != GameManager.GameState.PlayerAction)
+            {
+                return false;
+            }
         }
 
         building = CreateSettlement(settlementPrefab, player);
@@ -50,24 +56,30 @@ public class Vertex : MonoBehaviour
         {
             player.SpendSettlementCost();
             UIManager.Instance.UpdateAll();
+            GameManager.Instance.ChangeBuildMode(BuildMode.None);
+        } else
+        {
+            GameManager.Instance.ChangeState
+            (
+                GameManager.GameState.InitialRoad
+            );
         }
-        
-        GameManager.Instance.ChangeState
-        (
-            GameManager.GameState.InitialRoad
-        );
-        
         return true;
     }
 
     public bool UpgradeToCity(GameObject cityPrefab, Player player)
     {
+        if(GameManager.Instance.currentState
+            != GameManager.GameState.PlayerAction)
+        {
+            return false;
+        }
         if(!CanUpgradeToCity(player))
         {
             Debug.Log("都市化できません");
             return false;
         }
-        if(player.CanAffordCity())
+        if(!player.CanAffordCity())
         {
             Debug.Log("資源が足りません");
             return false;
@@ -75,6 +87,7 @@ public class Vertex : MonoBehaviour
         CreateCity(cityPrefab, player);
         player.SpendCityCost();
         UIManager.Instance.UpdateAll();
+        GameManager.Instance.ChangeBuildMode(BuildMode.None);
         
         return true;
     }
