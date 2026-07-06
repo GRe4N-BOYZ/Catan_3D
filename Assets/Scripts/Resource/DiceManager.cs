@@ -8,7 +8,7 @@ public class DiceManager : MonoBehaviour
     {
         Instance = this;
     }
-    public int RollDice()
+    public void RollDice()
     {
         int dice1 = Random.Range(1, 7);
         int dice2 = Random.Range(1, 7);
@@ -18,7 +18,13 @@ public class DiceManager : MonoBehaviour
         Debug.Log($"Dice : {dice1} + {dice2} = {lastDiceResult}");
         ResourceManager.Instance.DistributeResources(lastDiceResult);
 
-        UIManager.Instance.UpdateAll();
-        return lastDiceResult;
+        UIManager.Instance.UpdateDiceUI();
+        UIManager.Instance.UpdateResourceUI();
+        UIManager.Instance.UpdatePhaseUI();
+        
+        GameManager.Instance.ChangeState
+        (
+            GameManager.GameState.PlayerAction
+        );
     }
 }

@@ -9,7 +9,9 @@ public class GameManager : MonoBehaviour
     {
         InitialSettlement,
         InitialRoad,
-        NormalTurn
+        RollDice,
+        PlayerAction,
+        GameEnd
     }
 
     public GameState currentState;
@@ -47,14 +49,14 @@ public class GameManager : MonoBehaviour
     {
         currentState = GameState.InitialSettlement;
         ChangeBuildMode
-(
-    BuildMode.Settlement
-);
+        (
+            BuildMode.Settlement
+        );
     }
 
     private void Update()
     {
-        if (!PlayerManager.Instance.setupPhase &&
+        if (currentState == GameState.RollDice &&
             Keyboard.current.spaceKey.wasPressedThisFrame)
         {
             DiceManager.Instance.RollDice();

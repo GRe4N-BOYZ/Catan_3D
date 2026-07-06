@@ -20,7 +20,7 @@ public class ResourceManager : MonoBehaviour
         foreach (HexTile tile in allTiles)
         {
             // 出目が違う
-            if (tile.diceNumber != diceResult)
+            if (tile.numberToken != diceResult)
             {
                 continue;
             }
@@ -33,29 +33,26 @@ public class ResourceManager : MonoBehaviour
 
             GiveTileResources(tile);
         }
+        UIManager.Instance.UpdateAll();
     }
 
     private void GiveTileResources(HexTile tile)
     {
         foreach (Vertex vertex in tile.adjacentVertices)
         {
-            if (vertex == null)
-            {
-                continue;
-            }
+            if (vertex == null) continue;
+            if (vertex.building == null) continue;
 
-            if (vertex.building == null)
-            {
-                continue;
-            }
-
-            Player owner =
-                vertex.building.owner;
+            Player owner = vertex.building.owner;
+            
+            int amount = 1;
+            if(vertex.building is City) amount = 2;
 
             GiveResource
             (
                 owner,
-                tile.resourceType
+                tile.resourceType,
+                amount
             );
         }
     }
@@ -63,29 +60,30 @@ public class ResourceManager : MonoBehaviour
     private void GiveResource
     (
         Player player,
-        ResourceType type
+        ResourceType type,
+        int amount
     )
     {
         switch (type)
         {
             case ResourceType.Wood:
-                player.wood++;
+                player.wood += amount;
                 break;
 
             case ResourceType.Brick:
-                player.brick++;
+                player.brick += amount;
                 break;
 
             case ResourceType.Sheep:
-                player.sheep++;
+                player.sheep += amount;
                 break;
 
             case ResourceType.Wheat:
-                player.wheat++;
+                player.wheat += amount;
                 break;
 
             case ResourceType.Ore:
-                player.ore++;
+                player.ore += amount;
                 break;
 
             case ResourceType.Desert:
@@ -107,6 +105,5 @@ public class ResourceManager : MonoBehaviour
             $"Wheat:{player.wheat} " +
             $"Ore:{player.ore}"
         );
-        UIManager.Instance.UpdateAll();
     }
 }

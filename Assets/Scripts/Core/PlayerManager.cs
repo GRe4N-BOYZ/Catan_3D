@@ -103,10 +103,7 @@ public class PlayerManager : MonoBehaviour
             setupPhase = false;
             reverseOrder = false;
 
-            GameManager.Instance.ChangeState
-            (
-                GameManager.GameState.NormalTurn
-            );
+            StartTurn();
 
             Debug.Log("初期配置終了");
             
@@ -118,5 +115,25 @@ public class PlayerManager : MonoBehaviour
             GameManager.GameState.InitialSettlement
         );
         NextPlayer();
+    }
+
+    public void StartTurn()
+    {
+        GameManager.Instance.ChangeState
+        (
+            GameManager.GameState.RollDice
+        );
+        GameManager.Instance.ChangeBuildMode
+        (
+            BuildMode.None
+        );
+        UIManager.Instance.UpdateAll();
+        Debug.Log($"{currentPlayer.name} Turn Start");
+    }
+
+    public void EndTurn()
+    {
+        NextPlayer();
+        StartTurn();
     }
 }

@@ -104,7 +104,7 @@ public class UIManager : MonoBehaviour
 
     public void EndTurn()
     {
-        PlayerManager.Instance.NextPlayer();
+        PlayerManager.Instance.EndTurn();
         Debug.Log("Turn End");
     }
 
