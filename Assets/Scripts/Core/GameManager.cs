@@ -45,6 +45,15 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    /*private void DebugWin()
+    {
+        Debug.Log(
+            $"DEBUG: {PlayerManager.Instance.currentPlayer.name} Wins!"
+        );
+
+        ChangeState(GameState.GameEnd);
+    }*/
+    
     private void Start()
     {
         currentState = GameState.InitialSettlement;
@@ -60,6 +69,37 @@ public class GameManager : MonoBehaviour
             Keyboard.current.spaceKey.wasPressedThisFrame)
         {
             DiceManager.Instance.RollDice();
+        }
+    /*#if UNITY_EDITOR
+        if(Keyboard.current.gKey.wasPressedThisFrame)
+        {
+            DebugWin();
+        }
+    #endif*/
+
+        //rkey debug +10
+        if (Keyboard.current.rKey.wasPressedThisFrame)
+        {
+            Player player =
+                PlayerManager.Instance.currentPlayer;
+
+            player.DebugAddResources(10);
+
+            UIManager.Instance.UpdateResourceUI();
+        }
+    }
+
+    public void CheckGameEnd(Player player)
+    {
+        if(VictoryManager.Instance == null)
+        {
+            Debug.LogError("VictoryManagerが存在しません");
+            return;
+        }
+        if(VictoryManager.Instance.CheckVictory(player))
+        {
+            Debug.Log($"{player.name} Wins!");
+            ChangeState(GameState.GameEnd);
         }
     }
 }

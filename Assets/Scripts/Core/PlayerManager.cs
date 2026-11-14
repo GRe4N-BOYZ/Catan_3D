@@ -11,6 +11,22 @@ public class PlayerManager : MonoBehaviour
     public Player currentPlayer => players[currentIndex];
      public int initialPlacementCount = 0;
      public bool reverseOrder = false;
+     public bool isSetupPhase = true;
+
+     // 現在の手番のプレイヤーが、初期配置のセット（建物1＋道路1）を完了したか判定するメソッド
+    public bool CanEndTurnDuringSetup()
+    {
+        // 通常ターンであれば、いつでもEndTurnしてOK
+        if (!isSetupPhase) return true;
+
+        // 【チェックロジック】
+        // 初期配置フェーズの場合、GameManagerの現在のステート（GameState）が
+        // 「配置アクションがすべて終わってEndTurnを待っている状態」に遷移しているか、
+        // あるいはPlayerがこのターンに建てた数などのデータをもとに判定します。
+        // ここでは一番確実な「GameManagerのステート監視」を前提にします。
+        
+        return true; // 既存のGameStateの変数に合わせて調整
+    }
 
     public static PlayerManager EnsureInstance()
     {

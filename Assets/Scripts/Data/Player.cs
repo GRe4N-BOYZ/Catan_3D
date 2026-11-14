@@ -1,4 +1,5 @@
-using Unity.Mathematics;
+using System;
+using UnityEngine;
 
 public class Player
 {
@@ -48,5 +49,18 @@ public class Player
     {
         wheat -= 2;
         ore -= 3;
+    }
+
+    public void DebugAddResources(int amount)
+    {
+        wood += amount;
+        brick += amount;
+        sheep += amount;
+        wheat += amount;
+        ore += amount;
+
+        Debug.Log(
+        $"{name} Debug Resources +{amount}"
+    );
     }
 }

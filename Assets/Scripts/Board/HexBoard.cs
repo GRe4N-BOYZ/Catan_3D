@@ -19,59 +19,57 @@ public class HexBoard : MonoBehaviour
 
     float xOffset = Mathf.Sqrt(3);
     float zOffset = 1.5f;
-
     void Start()
     {
-        CreateHexBoard();
+
+        
+        // 1. アルゴリズム専用クラスをインスタンス化し、公式配置データを取得する
+        BoardGenerator generator = new BoardGenerator();
+        BoardData balancedData = generator.GenerateBoard(GameSettings.SelectedDifficulty);
+
+        // 2. そのデータを渡して、シーン上にオブジェクトを配置する
+        CreateHexBoard(balancedData);
+
+        // 3. 【既存のカメラ連携】盤面が完成した直後にカメラを真ん中に移動させる
+        CameraController cameraController = FindFirstObjectByType<CameraController>();
+        if (cameraController != null)
+        {
+            cameraController.SetToBoardCenter();
+        }
     }
 
-    void CreateHexBoard()
+     // 【引数をBoardDataに変更】
+    void CreateHexBoard(BoardData boardData)
     {
-        List<ResourceType> resources =
-            CreateResources();
-
-        List<int> numbers =
-            CreateNumbers();
-
         int[] rows = { 3, 4, 5, 4, 3 };
+        int tileIndex = 0;
 
         for (int row = 0; row < rows.Length; row++)
         {
             int count = rows[row];
-            
-            float startX = -(count -1) * xOffset / 2f; // Center the row
+            float startX = -(count - 1) * xOffset / 2f;
 
             for (int col = 0; col < count; col++)
             {
-                // xPos に rowOffset を加える
-                float xPos = startX + (col * xOffset);
+                float xPos = startX + col * xOffset;
                 float zPos = row * zOffset;
-
                 Vector3 pos = new Vector3(xPos, 0, zPos);
-                
-                GameObject tileObject = Instantiate(hexPrefab, pos, Quaternion.identity);
 
+                GameObject tileObject = Instantiate(hexPrefab, pos, Quaternion.identity);
                 HexTile tile = tileObject.GetComponent<HexTile>();
+
                 CreateVertices(pos, tile);
 
-                int index = Random.Range(0, resources.Count);
-                ResourceType resource = resources[index];
-                tile.resourceType = resource;
-                resources.RemoveAt(index);
+                TileData data = boardData.tiles[tileIndex++];
+                tile.resourceType = data.resourceType;
 
-                if(resource == ResourceType.Desert)
+                if (data.resourceType == ResourceType.Desert)
                 {
                     tile.hasRobber = true;
                 }
                 else
                 {
-                    int numberIndex =
-                        Random.Range(0, numbers.Count);
-                    
-                    tile.numberToken =
-                        numbers[numberIndex];
-                    
-                    numbers.RemoveAt(numberIndex);
+                    tile.numberToken = data.numberToken;
                 }
             }
         }
@@ -267,5 +265,11 @@ public class HexBoard : MonoBehaviour
     void Update()
     {
         
+    }
+
+    public Vector3 GetBoardCenter()
+    {
+        float centerZ = 2 * zOffset;
+        return new Vector3(0f, 0f, centerZ);
     }
 }

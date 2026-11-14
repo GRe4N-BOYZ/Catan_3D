@@ -72,11 +72,27 @@ public class UIManager : MonoBehaviour
             $"Dice : {DiceManager.Instance.lastDiceResult}";
     }
 
-    public void UpdatePhaseUI()
+    /*public void UpdatePhaseUI()
     {
         phaseText.text = 
             $"Phase : {GameManager.Instance.currentState}";
+    }*/
+    public void UpdatePhaseUI()
+    {
+        if (GameManager.Instance == null) return;
+
+        var state = GameManager.Instance.currentState;
+        phaseText.text = $"Phase : {state}";
+
+        // 【追加】通常行動フェーズ（PlayerAction）の時だけ、建設ボタンやEndTurnボタンを押せるようにする
+        bool isPlayerAction = (state == GameManager.GameState.PlayerAction);
+        
+        if (settlementButton != null) settlementButton.interactable = isPlayerAction;
+        if (roadButton != null) roadButton.interactable = isPlayerAction;
+        if (cityButton != null) cityButton.interactable = isPlayerAction;
+        if (endTurnButton != null) endTurnButton.interactable = isPlayerAction;
     }
+
 
     public void SetSettlementMode()
     {
@@ -110,6 +126,12 @@ public class UIManager : MonoBehaviour
 
     public void EndTurn()
     {
+        // 【追加】PlayerAction以外の状態（初期配置中やダイス振り前など）なら何もしない
+        if (GameManager.Instance.currentState != GameManager.GameState.PlayerAction)
+        {
+            Debug.LogWarning("初期配置またはダイスロールが完了していないため、ターンを終了できません。");
+            return;
+        }
         PlayerManager.Instance.EndTurn();
         Debug.Log("Turn End");
     }

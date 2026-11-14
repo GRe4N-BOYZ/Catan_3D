@@ -28,6 +28,10 @@ public class InputManager : MonoBehaviour
 
     public void Update()
     {
+        if(GameManager.Instance.currentState == GameManager.GameState.GameEnd)
+        {
+            return;
+        }
         if(PlayerManager.Instance == null)
         {
             PlayerManager.EnsureInstance();

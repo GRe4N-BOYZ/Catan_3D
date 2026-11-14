@@ -64,6 +64,7 @@ public class Vertex : MonoBehaviour
                 GameManager.GameState.InitialRoad
             );
         }
+        GameManager.Instance.CheckGameEnd(player);
         return true;
     }
 
@@ -89,6 +90,7 @@ public class Vertex : MonoBehaviour
         UIManager.Instance.UpdateAll();
         GameManager.Instance.ChangeBuildMode(BuildMode.None);
         
+        GameManager.Instance.CheckGameEnd(player);
         return true;
     }
 
