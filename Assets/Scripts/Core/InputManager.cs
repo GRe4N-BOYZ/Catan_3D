@@ -10,10 +10,10 @@ public class InputManager : MonoBehaviour
     public GameObject cityPrefab;
 
     [FormerlySerializedAs("vertexLayer")]
-    private LayerMask BuildMask;
     private LayerMask currentMask;
     private LayerMask settlementMask;
     private LayerMask roadMask;
+    private LayerMask hexTileMask;
 
     public void Start()
     {
@@ -22,6 +22,7 @@ public class InputManager : MonoBehaviour
         
         settlementMask = LayerMask.GetMask("Vertex");
         roadMask = LayerMask.GetMask("Edge");
+        hexTileMask = LayerMask.GetMask("HexTile");
 
         currentMask = settlementMask;
     }
@@ -41,7 +42,12 @@ public class InputManager : MonoBehaviour
         if(Mouse.current == null) return;
         if(mainCamera == null) return;
 
-        if(!PlayerManager.Instance.setupPhase)
+                // 【追加】盗賊移動フェーズ中は、レイヤーマスクをHexTileに固定する
+        if (GameManager.Instance.currentState == GameManager.GameState.MoveRobber)
+        {
+            currentMask = hexTileMask;
+        }
+        else if(!PlayerManager.Instance.setupPhase)
         {
             switch(GameManager.Instance.currentBuildMode)
             {
@@ -58,7 +64,8 @@ public class InputManager : MonoBehaviour
                     break;
                 
                 default:
-                    return;
+                    currentMask = 0;
+                    break;
             }
         } else
         {
@@ -85,6 +92,17 @@ public class InputManager : MonoBehaviour
             if(Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, currentMask))
             {
                 Debug.Log("Hit: " + hit.collider.name);
+
+                // 【追加】盗賊移動フェーズなら、当たったタイルへ盗賊を移動させる
+                if (GameManager.Instance.currentState == GameManager.GameState.MoveRobber)
+                {
+                    HexTile tile = hit.collider.GetComponentInParent<HexTile>();
+                    if (tile != null)
+                    {
+                        RobberManager.Instance?.MoveRobberTo(tile);
+                    }
+                    return; // 盗賊移動が終わったらここで処理終了
+                }
 
                 Vertex vertex = hit.collider.GetComponentInParent<Vertex>();
                 Edge edge = hit.collider.GetComponentInParent<Edge>();
@@ -148,13 +166,5 @@ public class InputManager : MonoBehaviour
                 Debug.Log("No hit on Vertex/Edge layer.");
             }
         }
-    }
-
-    public void EnsureBuildLayerIncludesBuildObjects()
-    {
-        int buildObjectLayers =
-            LayerMask.GetMask("Vertex", "Edge");
-
-        BuildMask |= buildObjectLayers;
     }
 }

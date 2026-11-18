@@ -10,6 +10,7 @@ public class GameManager : MonoBehaviour
         InitialSettlement,
         InitialRoad,
         RollDice,
+        MoveRobber,
         PlayerAction,
         GameEnd
     }
@@ -78,7 +79,7 @@ public class GameManager : MonoBehaviour
     #endif*/
 
         //rkey debug +10
-        if (Keyboard.current.rKey.wasPressedThisFrame)
+        if (Keyboard.current.f1Key.wasPressedThisFrame)
         {
             Player player =
                 PlayerManager.Instance.currentPlayer;

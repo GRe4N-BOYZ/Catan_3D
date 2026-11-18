@@ -66,6 +66,8 @@ public class HexBoard : MonoBehaviour
                 if (data.resourceType == ResourceType.Desert)
                 {
                     tile.hasRobber = true;
+                    // 【追加】砂漠に最初の盗賊コマを出現させる
+                    RobberManager.Instance?.InitializeRobber(tile);
                 }
                 else
                 {

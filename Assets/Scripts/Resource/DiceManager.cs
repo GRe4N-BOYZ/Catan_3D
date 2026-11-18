@@ -19,6 +19,17 @@ public class DiceManager : MonoBehaviour
         ResourceManager.Instance.DistributeResources(lastDiceResult);
 
         UIManager.Instance.UpdateDiceUI();
+        
+        // 【追加】7が出たら盗賊移動フェーズへ移行して処理を止める
+        if (lastDiceResult == 7)
+        {
+            Debug.Log("盗賊（7）が出ました！移動先のタイルをクリックしてください。");
+            GameManager.Instance.ChangeState(GameManager.GameState.MoveRobber);
+            return;
+        }
+
+        // 7以外なら通常通り資源を配布してPlayerActionへ
+        ResourceManager.Instance.DistributeResources(lastDiceResult);
         UIManager.Instance.UpdateResourceUI();
 
         GameManager.Instance.ChangeState
