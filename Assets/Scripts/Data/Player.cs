@@ -63,4 +63,32 @@ public class Player
         $"{name} Debug Resources +{amount}"
     );
     }
+
+        // 【追加】指定した種類の資源の現在の所持数を返す
+    public int GetResourceCount(ResourceType type)
+    {
+        switch (type)
+        {
+            case ResourceType.Wood: return wood;
+            case ResourceType.Brick: return brick;
+            case ResourceType.Sheep: return sheep;
+            case ResourceType.Wheat: return wheat;
+            case ResourceType.Ore: return ore;
+            default: return 0;
+        }
+    }
+
+    // 【追加】指定した種類の資源を増減させる（マイナスを渡せば消費になる）
+    public void AddResource(ResourceType type, int amount)
+    {
+        switch (type)
+        {
+            case ResourceType.Wood: wood += amount; break;
+            case ResourceType.Brick: brick += amount; break;
+            case ResourceType.Sheep: sheep += amount; break;
+            case ResourceType.Wheat: wheat += amount; break;
+            case ResourceType.Ore: ore += amount; break;
+        }
+    }
+
 }

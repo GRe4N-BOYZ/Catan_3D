@@ -9,6 +9,7 @@ public class Vertex : MonoBehaviour
     public List<Edge> connectedEdges = new List<Edge>();
 
     public Building building;
+     public HarborType harborType = HarborType.None; // 【追加】この頂点が持つ港の種類
     public bool HasBuilding()
     {
         return building != null;

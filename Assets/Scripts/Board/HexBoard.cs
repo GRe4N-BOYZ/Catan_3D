@@ -6,15 +6,19 @@ using UnityEngine.UIElements;
 public class HexBoard : MonoBehaviour
 {
     // Start is called once before the first execution of Update after the MonoBehaviour is created
+        [Header("Prefabs")] // 👈 これを書くと、Inspector上で太字の見出しがつくで！
     public GameObject hexPrefab;
     public GameObject vertexPrefab;
     public GameObject EdgePrefab;
     public GameObject settlementPrefab;
+    public GameObject harborPrefab;
+
 
     Dictionary<Vector3, Vertex> vertices =
     new Dictionary<Vector3, Vertex>();
 
     List<Vertex> allVertices = new List<Vertex>();
+    List<Edge> allEdges = new List<Edge>();
     HashSet<string> edgeKeys = new HashSet<string>();
 
     float xOffset = Mathf.Sqrt(3);
@@ -29,6 +33,7 @@ public class HexBoard : MonoBehaviour
 
         // 2. そのデータを渡して、シーン上にオブジェクトを配置する
         CreateHexBoard(balancedData);
+        CreateHarbors();
 
         // 3. 【既存のカメラ連携】盤面が完成した直後にカメラを真ん中に移動させる
         CameraController cameraController = FindFirstObjectByType<CameraController>();
@@ -206,14 +211,7 @@ public class HexBoard : MonoBehaviour
 
     void CreateEdge(Vertex a, Vertex b)
     {
-        /*Debug.Log(
-        Vector3.Distance(
-        a.transform.position,
-        b.transform.position
-        )
-        );*/
-
-        string key =
+         string key =
             a.GetInstanceID() < b.GetInstanceID()
             ? a.GetInstanceID() + "_" + b.GetInstanceID()
             : b.GetInstanceID() + "_" + a.GetInstanceID();
@@ -261,6 +259,7 @@ public class HexBoard : MonoBehaviour
 
         a.connectedEdges.Add(edgeScript);
         b.connectedEdges.Add(edgeScript);
+        allEdges.Add(edgeScript);
     }
 
     // Update is called once per frame
@@ -274,4 +273,114 @@ public class HexBoard : MonoBehaviour
         float centerZ = 2 * zOffset;
         return new Vector3(0f, 0f, centerZ);
     }
+
+        // 【追加】盤面の外周（海に面した辺）を自動検出し、9つの港を配置するアルゴリズム
+    void CreateHarbors()
+    {
+        // 1. 外周の辺（vertexA と vertexB が共有するタイルが1枚だけの辺）を抽出
+        List<Edge> coastalEdges = new List<Edge>();
+        foreach (Edge edge in allEdges)
+        {
+            int sharedTiles = 0;
+            foreach (HexTile tile in edge.vertexA.adjacentTiles)
+            {
+                if (edge.vertexB.adjacentTiles.Contains(tile))
+                {
+                    sharedTiles++;
+                }
+            }
+            // 共有タイルが1枚だけなら、片側が海の「沿岸の辺」！
+            if (sharedTiles == 1)
+            {
+                coastalEdges.Add(edge);
+            }
+        }
+
+        // 2. 外周の辺を盤面の中心からの角度順にソート（ぐるっと1周順番に並べる）
+        Vector3 boardCenter = GetBoardCenter();
+        coastalEdges.Sort((a, b) =>
+        {
+            float angleA = Mathf.Atan2(a.transform.position.z - boardCenter.z, a.transform.position.x - boardCenter.x);
+            float angleB = Mathf.Atan2(b.transform.position.z - boardCenter.z, b.transform.position.x - boardCenter.x);
+            return angleA.CompareTo(angleB);
+        });
+
+        // 3. 公式ルールの港9種類（3:1が4つ、2:1が5つ）をシャッフルして用意
+        List<HarborType> harbors = new List<HarborType>
+        {
+            HarborType.Generic3to1, HarborType.Generic3to1, HarborType.Generic3to1, HarborType.Generic3to1,
+            HarborType.Wood2to1, HarborType.Brick2to1, HarborType.Sheep2to1, HarborType.Wheat2to1, HarborType.Ore2to1
+        };
+        for (int i = harbors.Count - 1; i > 0; i--)
+        {
+            int rnd = Random.Range(0, i + 1);
+            HarborType tmp = harbors[i];
+            harbors[i] = harbors[rnd];
+            harbors[rnd] = tmp;
+        }
+
+        // 4. 外周30辺のうち、3辺おき（インデックス 0, 3, 6, 10, 13, 16, 20, 23, 26）に均等配置！
+        int[] harborIndices = { 0, 3, 6, 10, 13, 16, 20, 23, 26 };
+        for (int i = 0; i < harbors.Count && i < harborIndices.Length; i++)
+        {
+            int edgeIdx = harborIndices[i];
+            if (edgeIdx >= coastalEdges.Count) break;
+
+            Edge targetEdge = coastalEdges[edgeIdx];
+            HarborType type = harbors[i];
+
+            // 辺の両端の頂点（Vertex）に港の能力を付与する
+            targetEdge.vertexA.harborType = type;
+            targetEdge.vertexB.harborType = type;
+
+            // 見た目（harborPrefab）を少し海側（外側）にずらして生成
+                        // 【修正】その辺に接している唯一のタイルの中心を基準にして、完璧に辺の垂直方向（海側）へ配置する
+            if (harborPrefab != null)
+            {
+                // この辺（vertexAとvertexB）が共有している1枚のタイルを取得
+                HexTile adjacentTile = null;
+                foreach (HexTile tile in targetEdge.vertexA.adjacentTiles)
+                {
+                    if (targetEdge.vertexB.adjacentTiles.Contains(tile))
+                    {
+                        adjacentTile = tile;
+                        break;
+                    }
+                }
+
+                // タイル中心から辺の中心へ向かうベクトル（＝辺に対して完璧に90度垂直な海側の向き！）
+                Vector3 outwardDir = (adjacentTile != null)
+                    ? (targetEdge.transform.position - adjacentTile.transform.position).normalized
+                    : (targetEdge.transform.position - boardCenter).normalized;
+                outwardDir.y = 0f; // 高さがズレないように水平に固定
+
+                Vector3 spawnPos = targetEdge.transform.position + outwardDir * 0.6f;
+                Quaternion rot = Quaternion.LookRotation(-outwardDir); // 辺と完璧に平行になる向き
+                GameObject harborObj = Instantiate(harborPrefab, spawnPos, rot);
+                harborObj.name = $"Harbor_{type}";
+
+
+                TMPro.TMP_Text label = harborObj.GetComponentInChildren<TMPro.TMP_Text>();
+                if (label != null)
+                {
+                    label.text = GetHarborLabel(type);
+                }
+            }
+        }
+    }
+    
+        private string GetHarborLabel(HarborType type)
+    {
+        switch (type)
+        {
+            case HarborType.Generic3to1: return "3 : 1\nANY";
+            case HarborType.Wood2to1:    return "2 : 1\nWOOD";
+            case HarborType.Brick2to1:   return "2 : 1\nBRICK";
+            case HarborType.Sheep2to1:   return "2 : 1\nSHEEP";
+            case HarborType.Wheat2to1:   return "2 : 1\nWHEAT";
+            case HarborType.Ore2to1:     return "2 : 1\nORE";
+            default: return "";
+        }
+    }
+
 }

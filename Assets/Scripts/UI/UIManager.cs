@@ -16,6 +16,9 @@ public class UIManager : MonoBehaviour
     public Button roadButton;
     public Button cityButton;
     public Button endTurnButton;
+    public Button tradeButton;           // 【追加】貿易ボタンの枠
+    public TradeUIManager tradeUIManager; // 【追加】貿易UIマネージャーの枠
+
 
     private void Awake()
     {
@@ -36,6 +39,12 @@ public class UIManager : MonoBehaviour
         roadButton.onClick.AddListener(SetRoadMode);
         cityButton.onClick.AddListener(SetCityMode);
         endTurnButton.onClick.AddListener(EndTurn);
+
+        // 【追加】貿易ボタンを押したら貿易ウィンドウを開く
+        if (tradeButton != null && tradeUIManager != null)
+        {
+            tradeButton.onClick.AddListener(tradeUIManager.ToggleTradePanel);
+        }
     }
 
     public void UpdatePlayerUI()
@@ -91,6 +100,10 @@ public class UIManager : MonoBehaviour
         if (roadButton != null) roadButton.interactable = isPlayerAction;
         if (cityButton != null) cityButton.interactable = isPlayerAction;
         if (endTurnButton != null) endTurnButton.interactable = isPlayerAction;
+        
+        if (endTurnButton != null) endTurnButton.interactable = isPlayerAction;
+        if (tradeButton != null) tradeButton.interactable = isPlayerAction; // 【追加】
+
     }
 
 
