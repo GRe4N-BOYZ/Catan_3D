@@ -19,6 +19,10 @@ public class GameManager : MonoBehaviour
     public Vertex lastPlacedSettlement;
     public BuildMode currentBuildMode = BuildMode.None;
 
+    [Header("UI References")]
+    public ResultUIManager resultUIManager;
+
+
     private void Awake()
     {
         Instance = this;
@@ -46,14 +50,14 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    /*private void DebugWin()
+    private void DebugWin()
     {
-        Debug.Log(
-            $"DEBUG: {PlayerManager.Instance.currentPlayer.name} Wins!"
-        );
-
+        Player winner = PlayerManager.Instance.currentPlayer;
+        Debug.Log($"DEBUG: {winner.name} Wins!");
         ChangeState(GameState.GameEnd);
-    }*/
+        if (resultUIManager != null) resultUIManager.ShowResult(winner);
+    }
+
     
     private void Start()
     {
@@ -71,12 +75,12 @@ public class GameManager : MonoBehaviour
         {
             DiceManager.Instance.RollDice();
         }
-    /*#if UNITY_EDITOR
+    #if UNITY_EDITOR
         if(Keyboard.current.gKey.wasPressedThisFrame)
         {
             DebugWin();
         }
-    #endif*/
+    #endif
 
         //rkey debug +10
         if (Keyboard.current.f1Key.wasPressedThisFrame)
@@ -101,6 +105,11 @@ public class GameManager : MonoBehaviour
         {
             Debug.Log($"{player.name} Wins!");
             ChangeState(GameState.GameEnd);
+
+            if (resultUIManager != null)
+            {
+                resultUIManager.ShowResult(player);
+            }
         }
     }
 }
