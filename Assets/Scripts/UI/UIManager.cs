@@ -19,6 +19,8 @@ public class UIManager : MonoBehaviour
     public Button tradeButton;           // 【追加】貿易ボタンの枠
     public TradeUIManager tradeUIManager; // 【追加】貿易UIマネージャーの枠
 
+    [Header("Help UI")]
+    public GameObject helpPanel; // プレイ中の操作説明パネル
 
     private void Awake()
     {
@@ -153,5 +155,16 @@ public class UIManager : MonoBehaviour
     {
         UpdateAll();
         UpdateButton();
+
+        if (helpPanel != null) helpPanel.SetActive(false);
+    }
+
+    // 「?」ボタンと「Close」ボタンの両方から呼ぶ
+    public void ToggleHelpPanel()
+    {
+        if (helpPanel != null)
+        {
+            helpPanel.SetActive(!helpPanel.activeSelf);
+        }
     }
 }
