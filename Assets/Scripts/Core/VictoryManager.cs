@@ -3,7 +3,7 @@ using UnityEngine;
 public class VictoryManager : MonoBehaviour
 {
     public static VictoryManager Instance;
-    public const int VictoryPointToWin = 5;
+    public const int VictoryPointToWin = 10;
 
     public void Awake()
     {
