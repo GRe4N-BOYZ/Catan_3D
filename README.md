@@ -50,6 +50,20 @@
 
 ---
 
+### 🕹️ Controls（操作方法）
+
+| Input | Action |
+|---|---|
+| **Space** | サイコロを振る（RollDiceフェーズ） |
+| **Left Click** | 開拓地・街道・都市の建設 / 盗賊の移動 |
+| **WASD / Arrow Keys** | カメラの平行移動 |
+| **Right Drag / Q, E** | カメラの水平回転 |
+| **Mouse Wheel** | カメラのズームイン・ズームアウト |
+| **R** | カメラ位置・角度のリセット |
+
+
+---
+
 ## 🖥️ Game Screen
 
 ### ゲーム画面
